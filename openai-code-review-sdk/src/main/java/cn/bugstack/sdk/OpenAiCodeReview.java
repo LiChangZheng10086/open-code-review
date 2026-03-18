@@ -4,10 +4,7 @@ import cn.bugstack.sdk.domain.model.ChatCompletionRequest;
 import cn.bugstack.sdk.domain.model.ChatCompletionSyncResponse;
 import cn.bugstack.sdk.domain.model.Model;
 import com.alibaba.fastjson2.JSON;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.*;
@@ -18,9 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
-import java.util.logging.SimpleFormatter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @program: openai_code_review
