@@ -1,6 +1,7 @@
 package cn.bugstack.sdk;
 
 import cn.bugstack.sdk.domain.model.ChatCompletionRequest;
+import cn.bugstack.sdk.domain.model.ChatCompletionSyncResponse;
 import cn.bugstack.sdk.domain.model.Model;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -59,30 +60,22 @@ public class OpenAiCodeReview {
         connection.setRequestProperty("User-Agent","Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
         connection.setDoOutput(true);
 
-        String jsonInputString = "{\n" +
-                "          \"model\":\"glm-4\",\n" +
-                "          \"stream\": \"true\",\n" +
-                "          \"messages\": [\n" +
-                "              {\n" +
-                "                  \"role\": \"user\",\n" +
-                "                  \"content\": \"你是一个Java高级编程架构师，精通各类场景方案、架构设计和编程语言，请您分析下 "+diffCode+" 看看代码是否符合规范\"\n" +
-                "              }\n" +
-                "          ]\n" +
-                "        }";
         ChatCompletionRequest chatCompletionRequest = new ChatCompletionRequest();
         chatCompletionRequest.setModel(Model.GLM_4_FLASH.getCode());
+        chatCompletionRequest.setMessages(new ArrayList<ChatCompletionRequest.Prompt>() {
+            private static final long serialVersionUID = -7988151926241837899L;
 
-        chatCompletionRequest.setMessages(new ArrayList<ChatCompletionRequest.Prompt>(){{
-            add(new ChatCompletionRequest.Prompt("user","你是一个Java高级编程架构师，精通各类场景方案、架构设计和编程语言，请你根据git diff记录，对代码做出评审。代码为："));
-            add(new ChatCompletionRequest.Prompt("user",diffCode));
+            {
+                add(new ChatCompletionRequest.Prompt("user", "你是一个高级编程架构师，精通各类场景方案、架构设计和编程语言请，请您根据git diff记录，对代码做出评审。代码如下:"));
+                add(new ChatCompletionRequest.Prompt("user", diffCode));
+            }
+        });
 
-        }});
-
-        try (OutputStream os = connection.getOutputStream()){
-//            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+        try (OutputStream os = connection.getOutputStream()) {
             byte[] input = JSON.toJSONString(chatCompletionRequest).getBytes(StandardCharsets.UTF_8);
             os.write(input);
         }
+
         int responseCode = connection.getResponseCode();
         System.out.println(responseCode);
 
@@ -90,37 +83,17 @@ public class OpenAiCodeReview {
         String inputLine;
 
         StringBuilder content = new StringBuilder();
-        while ((inputLine = in.readLine())!=null){
+        while ((inputLine = in.readLine()) != null) {
             content.append(inputLine);
         }
+
         in.close();
         connection.disconnect();
 
-        // 正则匹配每个 data: 后面的内容（直到下一个 data: 或结尾）
-        Pattern pattern = Pattern.compile("data: (.*?)(?=data: |$)", Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(content);
+        System.out.println("评审结果：" + content.toString());
 
-        ObjectMapper mapper = new ObjectMapper();
-        StringBuilder fullContent = new StringBuilder();
+        ChatCompletionSyncResponse response = JSON.parseObject(content.toString(), ChatCompletionSyncResponse.class);
+        return response.getChoices().get(0).getMessage().getContent();
 
-        while (matcher.find()) {
-            String chunk = matcher.group(1).trim(); // 获取 data: 之后的内容
-            if (chunk.equals("[DONE]")) {
-                continue; // 忽略结束标记
-            }
-            // 解析 JSON
-            JsonNode root = mapper.readTree(chunk);
-            JsonNode choices = root.get("choices");
-            if (choices != null && choices.isArray() && choices.size() > 0) {
-                JsonNode delta = choices.get(0).get("delta");
-                if (delta != null && delta.has("content")) {
-                    String contents = delta.get("content").asText();
-                    if (contents != null && !contents.isEmpty()) {
-                        fullContent.append(contents);
-                    }
-                }
-            }
-        }
-        return fullContent.toString();
     }
 }
