@@ -1,5 +1,8 @@
 package cn.bugstack.sdk;
 
+import cn.bugstack.sdk.domain.model.ChatCompletionRequest;
+import cn.bugstack.sdk.domain.model.Model;
+import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -7,6 +10,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,9 +69,18 @@ public class OpenAiCodeReview {
                 "              }\n" +
                 "          ]\n" +
                 "        }";
+        ChatCompletionRequest chatCompletionRequest = new ChatCompletionRequest();
+        chatCompletionRequest.setModel(Model.GLM_4_FLASH.getCode());
+
+        chatCompletionRequest.setMessages(new ArrayList<ChatCompletionRequest.Prompt>(){{
+            add(new ChatCompletionRequest.Prompt("user","你是一个Java高级编程架构师，精通各类场景方案、架构设计和编程语言，请你根据git diff记录，对代码做出评审。代码为："));
+            add(new ChatCompletionRequest.Prompt("user",diffCode));
+
+        }});
 
         try (OutputStream os = connection.getOutputStream()){
-            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+//            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+            byte[] input = JSON.toJSONString(chatCompletionRequest).getBytes(StandardCharsets.UTF_8);
             os.write(input);
         }
         int responseCode = connection.getResponseCode();
