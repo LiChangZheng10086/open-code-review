@@ -34,7 +34,7 @@ public class OpenAiCodeReview {
     public static void main(String[] args) throws Exception {
         System.out.println("open ai 代码评审测试执行");
 
-        String token = System.getenv("CODE_TOKEN");
+        String token = System.getenv("GITHUB_TOKEN");
         if (null==token||token.isEmpty()) {
             throw new RuntimeException("没获取到token");
         }
