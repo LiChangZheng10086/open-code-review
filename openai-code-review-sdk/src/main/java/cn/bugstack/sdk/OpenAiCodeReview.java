@@ -131,9 +131,11 @@ public class OpenAiCodeReview {
             writer.write(log);
         }
 
-        git.add().addFilepattern(dateFolderName+"/"+fileName).call();
-        git.commit().setMessage("Add new File").call();
-        git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(token, ""));
+        git.add().addFilepattern(dateFolderName + "/" + fileName).call();
+        git.commit().setMessage("Add new file via GitHub Actions").call();
+        git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(token, "")).call();
+
+        System.out.println("Changes have been pushed to the repository.");
 
         return "https://github.com/LiChangZheng10086/-open-code-review-log/blob/master/"+dateFolderName+"/"+fileName;
 
