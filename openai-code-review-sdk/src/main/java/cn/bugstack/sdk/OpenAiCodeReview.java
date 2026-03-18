@@ -2,7 +2,9 @@ package cn.bugstack.sdk;
 
 import cn.bugstack.sdk.domain.model.ChatCompletionRequest;
 import cn.bugstack.sdk.domain.model.ChatCompletionSyncResponse;
+import cn.bugstack.sdk.domain.model.Message;
 import cn.bugstack.sdk.domain.model.Model;
+import cn.bugstack.sdk.types.utils.WXAccessTokenUtils;
 import com.alibaba.fastjson2.JSON;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -55,7 +57,21 @@ public class OpenAiCodeReview {
         System.out.println("code review："+log.toString());
 
         // 3. 写入评审日志
-        writeLog( log, token);
+        String gitLogPath = writeLog(log, token);
+        System.out.println("pushMessage:"+gitLogPath);
+        // 4. weixin通知
+        pushMessage(gitLogPath);
+
+    }
+
+    private static void pushMessage(String gitLogPath) {
+        String accessToken = WXAccessTokenUtils.getAccessToken();
+        Message message = new Message();
+        message.setUrl(gitLogPath);
+        message.put("project","big-market");
+        message.put("review",gitLogPath);
+        String url = String.format("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s", accessToken);
+        WXAccessTokenUtils.sendPostRequest(url, JSON.toJSONString(message));
     }
 
     private static String codeReview(String diffCode)  throws Exception{
