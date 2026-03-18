@@ -6,12 +6,19 @@ import cn.bugstack.sdk.domain.model.Model;
 import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Random;
+import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +32,12 @@ import java.util.regex.Pattern;
 
 public class OpenAiCodeReview {
     public static void main(String[] args) throws Exception {
-        System.out.println("测试执行");
+        System.out.println("open ai 代码评审测试执行");
+
+        String token = System.getenv("CODE_TOKEN");
+        if (null==token||token.isEmpty()) {
+            throw new RuntimeException("没获取到token");
+        }
 
         // 1.代码检出
         ProcessBuilder processBuilder = new ProcessBuilder("git", "diff", "HEAD~1", "HEAD");
@@ -48,6 +60,8 @@ public class OpenAiCodeReview {
         String log = codeReview(diffCode.toString());
         System.out.println("code review："+log.toString());
 
+        // 3. 写入评审日志
+        writeLog( log, token);
     }
 
     private static String codeReview(String diffCode)  throws Exception{
@@ -95,5 +109,44 @@ public class OpenAiCodeReview {
         ChatCompletionSyncResponse response = JSON.parseObject(content.toString(), ChatCompletionSyncResponse.class);
         return response.getChoices().get(0).getMessage().getContent();
 
+    }
+
+
+    private static String  writeLog(String log,String token) throws Exception {
+        Git git = Git.cloneRepository()
+                .setURI("https://github.com/LiChangZheng10086/-open-code-review-log.git")
+                .setDirectory(new File("repo"))
+                .setCredentialsProvider(new UsernamePasswordCredentialsProvider(token, ""))
+                .call();
+
+        String dateFolderName = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        File dateFolder = new File("repo/" + dateFolderName);
+        if (!dateFolder.exists()) {
+            dateFolder.mkdir();
+        }
+
+
+        String fileName = generateRandomString(12)+".md";
+        File newFile = new File(dateFolderName,fileName);
+        try(FileWriter writer = new FileWriter(newFile)){
+            writer.write(log);
+        }
+
+        git.add().addFilepattern(dateFolderName+"/"+fileName).call();
+        git.commit().setMessage("Add new File").call();
+        git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(token, ""));
+
+        return "https://github.com/LiChangZheng10086/-open-code-review-log/blob/master/"+dateFolderName+"/"+fileName;
+
+    }
+
+    private static String generateRandomString(int length){
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return sb.toString();
     }
 }
