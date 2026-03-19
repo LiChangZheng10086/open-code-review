@@ -57,7 +57,7 @@ jobs:
         run: java -jar ./libs/openai-code-review-sdk-1.0.0w.jar
         env:
           # git
-          GITHUB_REVIEW_LOG_URI: ${{ sercrets.CODE_REVIEW_LOG_URI }}
+          GITHUB_REVIEW_LOG_URI: ${{ secrets.CODE_REVIEW_LOG_URI }}
           GITHUB_TOKEN: ${{ secrets.CODE_TOKEN }}
           COMMIT_PROJECT: ${{ secrets.ERPO_NAME }}
           COMMIT_BRANCH: ${{ secrets.BRANCH_NAME }}
