@@ -17,29 +17,7 @@ import org.slf4j.LoggerFactory;
 
 
 public class OpenAiCodeReview {
-
     private static final Logger logger = LoggerFactory.getLogger(OpenAiCodeReview.class);
-
-    // weixin配置
-    private String weixin_appid = "wx8c26a7a3e28a6584";
-    private String weixin_secret = "7109903c2ea0730806865b29f351a3e7";
-    private String weixin_touser = "oj2LG2wjOHkEoDPpMoGI6jI4Uz3g";
-    private String weixin_template_id = "bZ_aNNDikPGXmzX4Zrmu87Es1Sttosm3V3_UagRHHyI";
-
-    // CahtGLM配置
-    private String chatglm_apiHost = "";
-    private String chatglm_apiKeySecret = "";
-
-    // GitHub配置
-    private String github_review_log_uri ;
-    private String github_token;
-
-    // 工程配置
-    private String github_project;
-    private String github_branch;
-    private String github_author;
-
-
 
     public static void main(String[] args) throws Exception {
         logger.info("open ai 代码评审测试执行");
