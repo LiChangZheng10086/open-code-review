@@ -1,8 +1,10 @@
-package cn.bugstack.sdk.domain.model;
+package cn.bugstack.sdk.infrastructure.openai.dto;
+
+import cn.bugstack.sdk.domain.model.Model;
 
 import java.util.List;
 
-public class ChatCompletionRequest {
+public class ChatCompletionRequestDTO {
 
     private String model = Model.GLM_4_FLASH.getCode();
     private List<Prompt> messages;

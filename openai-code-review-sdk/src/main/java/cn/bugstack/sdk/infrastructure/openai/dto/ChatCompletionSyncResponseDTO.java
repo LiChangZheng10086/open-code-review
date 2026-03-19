@@ -1,8 +1,8 @@
-package cn.bugstack.sdk.domain.model;
+package cn.bugstack.sdk.infrastructure.openai.dto;
 
 import java.util.List;
 
-public class ChatCompletionSyncResponse {
+public class ChatCompletionSyncResponseDTO {
 
     private List<Choice> choices;
 

@@ -30,8 +30,47 @@ jobs:
       - name: Copy openai-code-review-sdk JAR
         run: mvn dependency:copy -Dartifact=cn.bugstack:openai-code-review-sdk:1.0.0w -DoutputDirectory=./libs
 
+      - name: Get repository name
+        id: repo-name
+        run: echo "REPO_NAME=${GETHUB_REPOSITORY##*/}" >> $GETHUB_ENV
+
+      - name: Get branch name
+        id: branch-name
+        run: echo "BRANCH_NAME=${GITHUB_REF#fefs/heads/}" >> $GETHUB_ENV
+
+      - name: Get commit author
+        id: commit-author
+        run: echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an <%ae>')" >> $GETHUB_ENV
+
+      - name: Get commit message
+        id: commit-message
+        run: echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%s')" >> $GETHUB_ENV
+
+      - name: Print repository, branch name, commit author, and commit message
+        run:
+          echo "Repository name is ${{ env.REPO_NAME }}"
+          echo "Branch name is ${{ env.BRANCH_NAME }}"
+          echo "Commit aythor is ${{ env.COMMIT_AUTHOR }}"
+          echo "Commit message is ${{ env.COMMIT_MESSAGE }}"
+
       - name: Run code Review
         run: java -jar ./libs/openai-code-review-sdk-1.0.0w.jar
         env:
+          # git
+          GITHUB_REVIEW_LOG_URI: ${{ sercrets.CODE_REVIEW_LOG_URI }}
           GITHUB_TOKEN: ${{ secrets.CODE_TOKEN }}
+          COMMIT_PROJECT: ${{ secrets.ERPO_NAME }}
+          COMMIT_BRANCH: ${{ secrets.BRANCH_NAME }}
+          COMMIT_AUTHOR: ${{ secrets.COMMIT_AUTHOR }}
+          COMMIT_MESSAGE: ${{ secrets.COMMIT_MESSAGE }}
+          # weixin
+          WEIXIN_APPID: ${{ secrets.WEIXIN_APPID }}
+          WEIXIN_SECRET: ${{ secrets.WEIXIN_SECRET }}
+          WEIXIN_TOUSER: ${{ secrets.WEIXIN_TOUSER }}
+          WEIXIN_TEMPLATE_ID: ${{ secrets.WEIXIN_TEMPLATE_ID }}
+          # openai
+          CHATGLM_APIHOST: ${{ secrets.CHATGLM_APIHOST }}
+          CHATGLM_APIKEYSECRET: ${{ secrets.CHATGLM_APIKEYSECRET }}
+
+
 
