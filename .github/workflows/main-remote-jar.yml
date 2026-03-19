@@ -1,4 +1,4 @@
-name: Build and Run OpenAiCodeReview By Main Maven Jar
+name: Build and Run OpenAiCodeReview By Main Maven Jar Remote
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
         run: mkdir -p ./libs
 
       - name: Download openai-code-review-sdk JAR
-        run: wget -0 ./libs/openai-code-review-sdk-1.0.0w.jar https://github.com/LiChangZheng10086/open-code-review/releases/download/v1.0.0w/openai-code-review-sdk-1.0.0w.jar
+        run: wget -O ./libs/openai-code-review-sdk-1.0.0w.jar https://github.com/LiChangZheng10086/open-code-review/releases/download/v1.0.0w/openai-code-review-sdk-1.0.0w.jar
 
       - name: Get repository name
         id: repo-name
